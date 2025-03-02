@@ -121,7 +121,7 @@ async fn main() {
         //         let url_pair: String = url_pair.clone();
         //         let client: Arc<Client> = Arc::clone(&client);
         //         let task: task::JoinHandle<()> = tokio::spawn(async move {
-        //             http_keepalive(url_pair.clone(), i, client).await;
+        //             http_keepalive(url_pair, i, client).await;
         //         });
         //         tasks.push(task);
         //     }
