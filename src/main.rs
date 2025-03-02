@@ -99,17 +99,33 @@ async fn main() {
 
         let client: Arc<Client> = Arc::new(Client::new());
 
-        let mut handles: Vec<_> = Vec::new();
+        // compact loop
+        let mut tasks: Vec<_> = Vec::new();
         for url_pair in urls {
             let url_pairs: Vec<&str> = url_pair.split("---").collect();
             let num_processes: usize = url_pairs[2].parse().unwrap_or(0);
-            handles = (0..num_processes)
+            tasks = (0..num_processes)
             .map(|i| {
                 let client: Arc<Client> = Arc::clone(&client);
                 task::spawn(http_keepalive(url_pair.clone(), i, client))
             })
             .collect(); 
         }
+
+        // explicit loop
+        // let mut tasks:Vec<task::JoinHandle<()>>= Vec::new();
+        // for url_pair in urls {
+        //     let url_pairs: Vec<&str> = url_pair.split("---").collect();
+        //     let num_processes: usize = url_pairs[2].parse().unwrap_or(0);
+        //     for i in 0..num_processes {
+        //         let url_pair: String = url_pair.clone();
+        //         let client: Arc<Client> = Arc::clone(&client);
+        //         let task: task::JoinHandle<()> = tokio::spawn(async move {
+        //             http_keepalive(url_pair.clone(), i, client).await;
+        //         });
+        //         tasks.push(task);
+        //     }
+        // }
 
         let ctrl_c = async {
             signal::ctrl_c().await.expect("Failed to listen for Ctrl+C");
@@ -119,7 +135,7 @@ async fn main() {
         };
 
         tokio::select! {
-            _ = join_all(handles) => {
+            _ = join_all(tasks) => {
                 println!("All processes completed");
             }
             _ = ctrl_c => {}
