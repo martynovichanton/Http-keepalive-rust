@@ -16,7 +16,7 @@ const LOG_FILE: &str = "log.txt";
 pub async fn http_keepalive(url_pair: String, process_id: usize, client: Arc<Client>) {
     let url_pairs: Vec<&str> = url_pair.split("---").collect();
     let url: &str = url_pairs[0];
-    let exprected_string: &str = url_pairs[1];
+    let expected_string: &str = url_pairs[1];
     let start_idx: usize = url_pairs[3].parse().unwrap_or(0);
     let end_idx: usize = url_pairs[4].parse().unwrap_or(0);
 
@@ -35,15 +35,15 @@ pub async fn http_keepalive(url_pair: String, process_id: usize, client: Arc<Cli
         match client.get(updated_url).send().await {
             Ok(response) => {
                 let status: reqwest::StatusCode = response.status();
-                let elapsed_time: f32 = start_time.elapsed().as_secs_f32();
                 let text: String = response.text().await.unwrap_or_else(|_| "Failed to read response".to_string());
+                let elapsed_time: f32 = start_time.elapsed().as_secs_f32();
 
                 let log_entry: String = format!(
                     "{} - {} - elapsed_time: {:.3} - \n{} {}\n",
                     now, updated_url, elapsed_time, status, text
                 );
 
-                if !text.contains(exprected_string) {
+                if !text.contains(expected_string) {
                     count_errors += 1;
                     ids_errors.push(param_value.clone());
                 }
@@ -88,7 +88,7 @@ fn merge_logs() {
 #[tokio::main]
 async fn main() {
     // urls file content
-    // url---exoected_string---num_processes---start_idx---end_edx
+    // url---expected_string---num_processes---start_idx---end_idx
     
     let args: Vec<String> = env::args().collect();
     if args.len() == 2 {
