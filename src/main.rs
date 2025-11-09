@@ -52,7 +52,14 @@ pub async fn http_keepalive(url_pair: String, process_id: usize, client: Arc<Cli
                 println!("{}", log_entry);
             }
             Err(e) => {
-                let log_entry: String = format!("EXCEPTION: {}\n", e);
+                let status: String = format!("EXCEPTION: {}\n", e);
+                let elapsed_time: f32 = start_time.elapsed().as_secs_f32();
+
+                let log_entry: String = format!(
+                    "{} - {} - elapsed_time: {:.3} - \n{}\n",
+                    now, updated_url, elapsed_time, status
+                );
+
                 count_errors += 1;
                 ids_errors.push(param_value.clone());
                 append_to_file(&log_file_path, &log_entry);
